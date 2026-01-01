@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px;">
+    <div class="card" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+        <div style="display: flex; gap: 2rem; align-items: start; padding-bottom: 2rem; border-bottom: 1px solid var(--border-color); margin-bottom: 2rem;">
+            <!-- Avatar Display -->
+            <div style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                {% if user.profile_image %}
+                    <img src="{{ user.profile_image.url }}" alt="{{ user.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    <span style="font-size: 2.5rem; font-weight: bold;">{{ user.username|make_list|first|upper }}</span>
+                {% endif %}
+            </div>
+            
+            <div>
+                <h1 style="margin-bottom: 0.5rem; font-size: 2rem;">{{ user.username }}</h1>
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                    <span class="badge badge-yellow">{{ user.get_role_display }}</span>
+                </p>
+                <p style="color: var(--text-muted);">Joined: {{ user.date_joined|date:"M Y" }}</p>
+            </div>
+        </div>
+
+        <h3 style="color: var(--primary-color); margin-bottom: 1.5rem;">Edit Details</h3>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if form.errors %}
+                <div class="alert alert-danger" style="color: red; margin-bottom: 1rem;">
+                    Please correct the errors below.
+                </div>
+            {% endif %}
+
+            <!-- Image Upload Field -->
+            <div style="margin-bottom: 1.5rem;">
+                <label>Profile Picture</label>
+                {{ form.profile_image }}
+                <small style="color: var(--text-muted);">Upload a new photo to change your avatar.</small>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="modern-input-group">
+                    <label>Email Address</label>
+                    <div style="position: relative;">
+                        <span class="input-icon" style="top: 50%;">📧</span>
+                        <input type="email" name="email" value="{{ form.email.value|default:'' }}" class="modern-input" required>
+                    </div>
+                </div>
+
+                <div class="modern-input-group">
+                    <label>Phone Number</label>
+                     <div style="position: relative;">
+                        <span class="input-icon" style="top: 50%;">📱</span>
+                        <input type="text" name="phone_number" value="{{ form.phone_number.value|default:'' }}" class="modern-input">
+                     </div>
+                </div>
+
+                <div class="modern-input-group">
+                    <label>Latitude</label>
+                     <div style="position: relative;">
+                        <span class="input-icon" style="top: 50%;">📍</span>
+                        <input type="number" step="any" name="latitude" id="latitude" value="{{ form.latitude.value|default:'' }}" class="modern-input">
+                     </div>
+                </div>
+
+                <div class="modern-input-group">
+                    <label>Longitude</label>
+                     <div style="position: relative;">
+                        <span class="input-icon" style="top: 50%;">📍</span>
+                        <input type="number" step="any" name="longitude" id="longitude" value="{{ form.longitude.value|default:'' }}" class="modern-input">
+                     </div>
+                </div>
+            </div>
+            
+            <button type="button" onclick="detectLocation()" class="btn" style="background: transparent; border: 1px solid var(--secondary-color); color: var(--secondary-color); width: 100%; margin-top: 1rem; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                📍 Use Current Location
+            </button>
+            <p id="location-status" style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0; display: none;"></p>
+
+            <script>
+                function detectLocation() {
+                    const status = document.getElementById('location-status');
+                    status.style.display = 'block';
+                    status.textContent = 'Detecting location...';
+                    status.style.color = 'var(--text-muted)';
+                    
+                    if (!navigator.geolocation) {
+                        status.textContent = 'Geolocation is not supported by your browser';
+                        status.style.color = 'var(--status-red)';
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
+                            document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
+                            status.textContent = 'Location detected successfully!';
+                            status.style.color = 'var(--status-green)';
+                        },
+                        (error) => {
+                            status.textContent = 'Unable to retrieve location. Please allow access.';
+                            status.style.color = 'var(--status-red)';
+                            console.error(error);
+                        }
+                    );
+                }
+            </script>
+
+            <div style="text-align: right; margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary" style="padding: 0.8rem 2rem;">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Local Overrides for explicit styling of inputs in this specific form structure if global .modern-input logic misses manual inputs */
+    .modern-input {
+        background-color: #F3F4F6;
+        border: 1px solid transparent;
+        padding: 0.8rem 1rem 0.8rem 3rem; /* Space for icon */
+        border-radius: 12px;
+        width: 100%;
+        font-size: 0.95rem;
+        color: inherit;
+        box-sizing: border-box;
+    }
+    .modern-input:focus {
+        border-color: var(--primary-color);
+        background-color: white;
+        outline: none;
+    }
+    label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        display: block;
+        color: var(--text-muted);
+    }
+</style>
+{% endblock %}

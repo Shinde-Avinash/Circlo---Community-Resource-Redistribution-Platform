@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Join Us{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-split-card" style="flex-direction: row-reverse;">
+        <!-- Right Side (Form) -->
+        <div class="auth-left">
+            <h2 class="auth-title">Create Account</h2>
+            <p class="auth-subtitle">Start sharing with your neighbors today</p>
+
+            <form method="post">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                <div class="modern-input-group">
+                    <!-- Dynamic Icon Logic based on field name -->
+                    <span class="input-icon">
+                        {% if 'user' in field.name %}👤
+                        {% elif 'email' in field.name %}📧
+                        {% elif 'phone' in field.name %}📱
+                        {% elif 'pass' in field.name %}🔒
+                        {% elif 'role' in field.name %}💼
+                        {% elif 'lat' in field.name or 'long' in field.name %}📍
+                        {% else %}✎{% endif %}
+                    </span>
+                    
+                    {% if field.name == 'role' %}
+                         <!-- Explicitly render role as widget (Select) -->
+                         {{ field }}
+                    {% elif field.field.widget.input_type %}
+                         <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" placeholder="{{ field.label }}" class="modern-input" {% if field.value %}value="{{ field.value }}"{% endif %} {% if field.field.required %}required{% endif %}>
+                    {% else %}
+                        <!-- Fallback -->
+                        {{ field }} 
+                    {% endif %}
+                    
+                    {% if field.help_text %}
+                        <small style="color: var(--text-muted); display: block; margin-top: 0.25rem; font-size: 0.8rem;">{{ field.help_text }}</small>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                        <small style="color: #DC2626; display: block; margin-top: 0.25rem;">{{ field.errors|striptags }}</small>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="btn-auth" style="background: linear-gradient(90deg, #14B8A6 0%, #0D9488 100%);">Register Now</button>
+            </form>
+
+            <p style="text-align: center; margin-top: 2rem; font-size: 0.9rem;">
+                Already a member? <a href="{% url 'login' %}" style="color: #14B8A6; font-weight: 600; text-decoration: none;">Login</a>
+            </p>
+        </div>
+
+        <!-- Left Side (Visual) -->
+        <div class="auth-right" style="background: linear-gradient(135deg, #14B8A6 0%, #0F766E 100%);">
+            <div class="bg-circle" style="width: 300px; height: 300px; top: -50px; left: -50px;"></div>
+            <img src="{% static 'img/register-hero.png' %}" alt="Community Illustration">
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Ensure Select has the arrow icon */
+    .modern-input-group select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231F2937%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 0.8rem auto;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

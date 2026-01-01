@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-split-card">
+        <!-- Left Side: Form -->
+        <div class="auth-left">
+            <h2 class="auth-title">LOGIN</h2>
+            <p class="auth-subtitle">Welcome back to the community</p>
+
+            <form method="post">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="alert alert-warning" style="margin-bottom: 2rem; border-radius: 8px; font-size: 0.9rem;">
+                        Login failed. Please check your credentials.
+                    </div>
+                {% endif %}
+
+                <div class="modern-input-group">
+                    <span class="input-icon">👤</span>
+                    <input type="text" name="username" placeholder="Username" required>
+                </div>
+
+                <div class="modern-input-group">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+
+                <button type="submit" class="btn-auth">Login Now</button>
+            </form>
+
+            <div class="auth-divider">
+                <span>Login with Others</span>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button style="border: 1px solid #E5E7EB; background: white; padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
+                    <span style="color: #DB4437; font-weight: bold;">G</span> Google
+                </button>
+                <button style="border: 1px solid #E5E7EB; background: white; padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500;">
+                    <span style="color: #4267B2; font-weight: bold;">f</span> Facebook
+                </button>
+            </div>
+            
+            <p style="text-align: center; margin-top: 2rem; font-size: 0.9rem;">
+                Don't have an account? <a href="{% url 'register' %}" style="color: #4F46E5; font-weight: 600; text-decoration: none;">Register</a>
+            </p>
+        </div>
+
+        <!-- Right Side: Visual -->
+        <div class="auth-right">
+            <div class="bg-circle" style="width: 300px; height: 300px; top: -50px; right: -50px;"></div>
+            <div class="bg-circle" style="width: 200px; height: 200px; bottom: 50px; left: -50px;"></div>
+            <img src="{% static 'img/login-hero.png' %}" alt="Login Illustration">
+        </div>
+    </div>
+</div>
+{% endblock %}

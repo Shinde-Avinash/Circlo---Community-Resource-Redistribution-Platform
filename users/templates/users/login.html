@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 3rem auto;">
+    <div class="card" style="border-top: 5px solid var(--primary-color);">
+        <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 2rem;">Welcome Back</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            {% if form.errors %}
+                <div class="alert alert-danger" style="background: #ffebee; color: #c62828; padding: 10px; border-radius: 4px; margin-bottom: 1rem;">
+                    <p style="margin: 0;">Invalid username or password.</p>
+                </div>
+            {% endif %}
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Username</label>
+                <input type="text" name="username" class="form-control" required style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; box-sizing: border-box;">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Password</label>
+                <input type="password" name="password" class="form-control" required style="width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 4px; box-sizing: border-box;">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: 1rem;">Sign In</button>
+        </form>
+    </div>
+    <div style="text-align: center; margin-top: 1.5rem;">
+        <p style="color: var(--text-muted);">New to the community? <a href="{% url 'register' %}" style="color: var(--secondary-color); font-weight: bold;">Create Account</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% for msg in chat_messages %}
+    <div style="display: flex; flex-direction: column; align-items: {% if msg.sender == user %}flex-end{% else %}flex-start{% endif %}; margin-bottom: 1rem;">
+        <div style="max-width: 70%; padding: 0.8rem 1rem; border-radius: 18px; 
+                    background: {% if msg.sender == user %}var(--primary-color){% else %}var(--bg-secondary){% endif %}; 
+                    color: {% if msg.sender == user %}white{% else %}var(--text-color){% endif %};
+                    {% if msg.sender == user %}border-bottom-right-radius: 4px;{% else %}border-bottom-left-radius: 4px;{% endif %}">
+            {{ msg.content }}
+        </div>
+        <small style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem;">
+            {{ msg.timestamp|date:"g:i A" }}
+        </small>
+    </div>
+{% empty %}
+    <p style="text-align: center; color: var(--text-muted); margin-top: 2rem;">No messages yet. Say hello!</p>
+{% endfor %}

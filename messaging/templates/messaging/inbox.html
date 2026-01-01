@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}My Messages{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 2rem auto;">
+    <h1 style="margin-bottom: 2rem;">My Messages</h1>
+
+    {% if conversations %}
+        <div class="card" style="padding: 0;">
+            {% for chat in conversations %}
+                <a href="{% url 'chat_detail' chat.id %}" style="text-decoration: none; color: inherit;">
+                    <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <h3 style="margin: 0; color: var(--primary-color);">{{ chat.resource.title }}</h3>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">{{ chat.updated_at|timesince }} ago</span>
+                        </div>
+                        <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">
+                            With: 
+                            {% for p in chat.participants.all %}
+                                {% if p != user %}{{ p.username }}{% endif %}
+                            {% endfor %}
+                        </p>
+                        {% with last_msg=chat.messages.last %}
+                            {% if last_msg %}
+                                <p style="margin: 0.5rem 0 0 0; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    <strong>{{ last_msg.sender.username }}:</strong> {{ last_msg.content }}
+                                </p>
+                            {% else %}
+                                <p style="margin: 0.5rem 0 0 0; color: var(--text-muted); font-style: italic;">No messages yet.</p>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 3rem;">
+            <h2 style="color: var(--text-muted);">No messages yet 📭</h2>
+            <p>Start a conversation by clicking "Message Donor" on any resource page.</p>
+            <a href="{% url 'home' %}" class="btn btn-primary" style="margin-top: 1rem; display: inline-block;">Browse Resources</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

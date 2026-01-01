@@ -1,0 +1,44 @@
+        <div class="card urgency-{{ res.urgency }}" style="position: relative; transition: transform 0.2s; cursor: pointer; overflow: hidden; padding: 1rem;" onclick="location.href='{% url 'resource_detail' res.id %}';">
+            <!-- Resource Image if available -->
+            {% if res.image %}
+                <div style="height: 140px; margin: -1rem -1rem 0.8rem -1rem; overflow: hidden; border-bottom: 1px solid var(--border-color);">
+                    <img src="{{ res.image.url }}" alt="{{ res.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+            {% endif %}
+
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                <span class="badge badge-{{ res.urgency }}" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">
+                    {{ res.get_urgency_display }}
+                </span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">
+                    {{ res.distance_km }} km
+                </span>
+            </div>
+            
+            <!-- Main Title Link -->
+            <a href="{% url 'resource_detail' res.id %}" style="text-decoration: none; color: inherit;">
+                <h3 style="margin: 0 0 0.2rem 0; font-size: 1.1rem; color: var(--primary-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ res.title }}</h3>
+            </a>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">{{ res.category|title }} • {{ res.available_quantity }} {{ res.unit }}</p>
+            
+            <p style="margin: 0 0 1rem 0; font-size: 0.9rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ res.description }}</p>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; position: relative; z-index: 2;">
+                <!-- Stop propagation to prevent card click when interacting with buttons/badges -->
+                <span style="font-size: 0.8rem; color: var(--accent-color);" onclick="event.stopPropagation()">
+                    @{{ res.donor.username }}
+                </span>
+                {% if user.is_authenticated %}
+                    {% if res.donor == user %}
+                        <span class="badge badge-yellow" style="font-size: 0.7rem;">Mine</span>
+                    {% else %}
+                        <form action="{% url 'claim_resource' res.id %}" method="post" onsubmit="return openClaimModal(event, this, {{ res.available_quantity }});" onclick="event.stopPropagation()">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Claim</button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn" style="background: #ddd; font-size: 0.8rem; padding: 0.3rem 0.8rem;" onclick="event.stopPropagation()">Login</a>
+                {% endif %}
+            </div>
+        </div>

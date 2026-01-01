@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CRRP{% endblock %} | Community Resource Platform</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=2">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+
+<nav class="navbar">
+    <div style="max-width: 1200px; margin: 0 auto; width: 100%; display: flex; justify-content: space-between; align-items: center;">
+        <a href="/" class="navbar-brand">
+            <span style="color: var(--primary-color);">Circlo</span>
+        </a>
+        <div class="navbar-links" style="display: flex; align-items: center;">
+            <a href="/" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Feed</a>
+            {% if user.is_authenticated %}
+                {% if user.role == 'moderator' or user.is_superuser %}
+                    <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" style="color: #EF4444; font-weight: bold;">Admin Dashboard</a>
+                {% endif %}
+                <a href="{% url 'post_resource' %}" class="nav-link {% if request.resolver_match.url_name == 'post_resource' %}active{% endif %}">Post Item</a>
+                <a href="{% url 'inbox' %}" class="nav-link {% if request.resolver_match.url_name == 'inbox' %}active{% endif %}">Messages</a>
+                <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" style="margin-left: 2rem; color: var(--text-color); font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border: 2px solid white;">
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            {{ user.username|make_list|first|upper }}
+                        {% endif %}
+                    </div>
+                    <span style="display: none; @media(min-width: 768px){display:inline;}">
+                        {{ user.username }}
+                    </span>
+                </a>
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" style="background: none; border: none; font-family: inherit; margin-left: 1rem; cursor: pointer; color: var(--text-muted); font-weight: 500; font-size: 0.95rem;">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}" class="btn btn-primary" style="margin-left: 1rem; color: white; padding: 0.5rem 1rem;">Join Now</a>
+            {% endif %}
+            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block content %}
+    {% endblock %}
+</div>
+
+<footer style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+    &copy; 2025 Community Resource Redistribution Platform.
+</footer>
+
+<script>
+    // Theme Toggling Logic
+    function toggleTheme() {
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    }
+
+    // Initialize Theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
+</script>
+
+</body>
+</html>

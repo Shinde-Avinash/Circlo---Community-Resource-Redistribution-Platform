@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Chat - {{ conversation.resource.title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 2rem auto; height: 75vh; display: flex; flex-direction: column;" class="card">
+    <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h3 style="margin: 0; color: var(--primary-color);">{{ conversation.resource.title }}</h3>
+            <small style="color: var(--text-muted);">
+                Participants: {% for p in conversation.participants.all %}{{ p.username }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            </small>
+        </div>
+        <a href="{% url 'inbox' %}" class="btn" style="background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color);">Back to Inbox</a>
+    </div>
+
+    <!-- Messages Area (Scrollable) -->
+    <!-- We use id="chat-messages" for HTMX targeting -->
+    <div id="chat-messages" 
+         style="flex: 1; overflow-y: auto; padding: 1rem; margin-bottom: 1rem; display: flex; flex-direction: column;"
+         hx-get="{% url 'chat_detail' conversation.id %}" 
+         hx-trigger="every 3s">
+        {% include 'messaging/message_list_partial.html' %}
+    </div>
+
+    <!-- Input Area -->
+    <form hx-post="{% url 'send_message' conversation.id %}" 
+          hx-target="#chat-messages" 
+          hx-on::after-request="this.reset(); scrollToBottom();">
+        {% csrf_token %}
+        <div style="display: flex; gap: 0.8rem; align-items: center;">
+            <div style="flex: 1;">
+                {{ form.content }}
+            </div>
+            <button type="submit" class="btn btn-primary" style="padding: 0.8rem 1.5rem; border-radius: 20px;">Send</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* Ensure message bubbles have good contrast in dark mode via variables or explicit fallbacks */
+    .msg-received {
+        background: #f3f4f6; 
+        color: #333;
+    }
+    @media (prefers-color-scheme: dark) {
+        .msg-received {
+            background: #374151;
+            color: #fff;
+        }
+    }
+</style>
+
+<script>
+    // Auto-scroll to bottom
+    function scrollToBottom() {
+        const container = document.getElementById('chat-messages');
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+    
+    // Initial scroll
+    scrollToBottom();
+
+    // Scroll after HTMX swaps (new messages)
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if(evt.detail.target.id === 'chat-messages') {
+             scrollToBottom();
+        }
+    });
+</script>
+{% endblock %}

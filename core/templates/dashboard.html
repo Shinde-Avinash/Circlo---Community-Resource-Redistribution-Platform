@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="header-section" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: end;">
+    <div>
+        <h1>Admin Dashboard</h1>
+        <p style="color: var(--text-muted);">Overview of platform activity and quick actions.</p>
+    </div>
+    <div style="display: flex; gap: 1rem;">
+        <a href="{% url 'manage_users' %}" class="btn" style="background: var(--primary-color);">Manage Users</a>
+        <a href="{% url 'manage_resources' %}" class="btn" style="background: var(--accent-color);">Manage Resources</a>
+    </div>
+</div>
+
+<!-- Key Metrics -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="card" style="text-align: center; border-left: 4px solid var(--primary-color);">
+        <h3 style="font-size: 2.5rem; margin: 0; color: var(--text-color);">{{ total_active }}</h3>
+        <p style="color: var(--text-muted);">Active Listings</p>
+    </div>
+    <div class="card" style="text-align: center; border-left: 4px solid var(--status-green);">
+        <h3 style="font-size: 2.5rem; margin: 0; color: var(--text-color);">{{ total_claimed }}</h3>
+        <p style="color: var(--text-muted);">Items Claimed</p>
+    </div>
+    <div class="card" style="text-align: center; border-left: 4px solid #6366F1;">
+        <h3 style="font-size: 2.5rem; margin: 0; color: var(--text-color);">{{ total_users }}</h3>
+        <p style="color: var(--text-muted);">Total Users</p>
+    </div>
+    <div class="card" style="text-align: center; border-left: 4px solid #F59E0B;">
+        <h3 style="font-size: 2.5rem; margin: 0; color: var(--text-color);">{{ pending_ratio }}%</h3>
+        <p style="color: var(--text-muted);">Fulfillment Rate</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 3rem;">
+    <!-- Large Chart -->
+    <div class="card">
+        <h3 style="margin-bottom: 1.5rem;">Category Distribution</h3>
+        <canvas id="categoryChart" style="max-height: 300px;"></canvas>
+    </div>
+    
+    <!-- Side Stats -->
+    <div class="card">
+        <h3 style="margin-bottom: 1.5rem;">Urgency Breakdown</h3>
+        <canvas id="urgencyChart" style="max-height: 200px; margin-bottom: 1rem;"></canvas>
+        <div style="text-align: center; font-size: 0.9rem; color: var(--text-muted);">
+            High Priority Items Need Attention
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity & New Users -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <div class="card">
+        <h3 style="margin-bottom: 1rem;">Recent Listings</h3>
+        <ul style="list-style: none; padding: 0;">
+            {% for r in recent_resources %}
+            <li style="padding: 0.8rem 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+                <div>
+                    <a href="{% url 'resource_detail' r.id %}" style="font-weight: 500; color: var(--primary-color);">{{ r.title }}</a>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">by {{ r.donor.username }} • {{ r.created_at|date:"M d" }}</div>
+                </div>
+                <span class="badge badge-{{ r.urgency }}">{{ r.get_urgency_display }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        <div style="text-align: center; margin-top: 1rem;">
+            <a href="{% url 'manage_resources' %}" style="font-size: 0.9rem; color: var(--accent-color);">View All Resources &rarr;</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-bottom: 1rem;">New Users</h3>
+        <ul style="list-style: none; padding: 0;">
+            {% for u in recent_users %}
+            <li style="padding: 0.8rem 0; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--border-color); color: var(--text-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold;">
+                    {{ u.username|make_list|first|upper }}
+                </div>
+                <div>
+                    <div style="font-weight: 500;">{{ u.username }}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">{{ u.email|default:"No Email" }}</div>
+                </div>
+                <span style="margin-left: auto; font-size: 0.8rem; border: 1px solid var(--border-color); padding: 0.2rem 0.5rem; border-radius: 4px; color: var(--text-muted);">{{ u.get_role_display }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        <div style="text-align: center; margin-top: 1rem;">
+            <a href="{% url 'manage_users' %}" style="font-size: 0.9rem;">View All Users &rarr;</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Urgency Chart
+    const ctxUrgency = document.getElementById('urgencyChart').getContext('2d');
+    new Chart(ctxUrgency, {
+        type: 'doughnut',
+        data: {
+            labels: ['Red (High)', 'Yellow (Medium)', 'Green (Low)'],
+            datasets: [{
+                data: [{{ urgency_counts.red }}, {{ urgency_counts.yellow }}, {{ urgency_counts.green }}],
+                backgroundColor: ['#EF4444', '#F59E0B', '#10B981'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Category Chart uses data passed from view
+    const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+    new Chart(ctxCategory, {
+        type: 'bar',
+        data: {
+            labels: [{% for item in category_labels %}"{{ item }}",{% endfor %}],
+            datasets: [{
+                label: 'Items Posted',
+                data: [{% for item in category_counts %}{{ item }},{% endfor %}],
+                backgroundColor: '#6366F1',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+
+<style>
+    @media (max-width: 900px) {
+        div[style*="grid-template-columns: 2fr 1fr"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Panel{% endblock %}
+
+{% block content %}
+<div class="header-section">
+    <h1>Admin & Moderation Panel</h1>
+    <p>Manage users, resources, and community safety.</p>
+</div>
+
+<div class="card" style="margin-bottom: 2rem;">
+    <h3 style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">User Management</h3>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align: left; background: #F3F4F6;">
+                    <th style="padding: 1rem;">User</th>
+                    <th style="padding: 1rem;">Role</th>
+                    <th style="padding: 1rem;">Email</th>
+                    <th style="padding: 1rem;">Joined</th>
+                    <th style="padding: 1rem;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <!-- Tiny Avatar -->
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: #ccc; overflow: hidden;">
+                                {% if u.profile_image %}
+                                    <img src="{{ u.profile_image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% endif %}
+                            </div>
+                            {{ u.username }} {% if u.is_superuser %} <span style="color: red; font-size: 0.8rem;">(Admin)</span>{% endif %}
+                        </div>
+                    </td>
+                    <td style="padding: 1rem;">{{ u.get_role_display }}</td>
+                    <td style="padding: 1rem;">{{ u.email }}</td>
+                    <td style="padding: 1rem;">{{ u.date_joined|date:"M d, Y" }}</td>
+                    <td style="padding: 1rem;">
+                        {% if not u.is_superuser and u != user %}
+                            <button type="button" class="btn" style="background: #EF4444; color: white; padding: 0.4rem 0.8rem; font-size: 0.8rem;" 
+                                    onclick="openDeleteModal('{% url 'delete_user' u.id %}', '{{ u.username|escapejs }}')">Delete</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">All Resources</h3>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align: left; background: #F3F4F6;">
+                    <th style="padding: 1rem;">Title</th>
+                    <th style="padding: 1rem;">Donor</th>
+                    <th style="padding: 1rem;">Status</th>
+                    <th style="padding: 1rem;">Urgency</th>
+                    <th style="padding: 1rem;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in resources %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 1rem;"><a href="{% url 'resource_detail' r.id %}">{{ r.title }}</a></td>
+                    <td style="padding: 1rem;">{{ r.donor.username }}</td>
+                    <td style="padding: 1rem;">{% if r.is_active %}Active{% else %}Claimed{% endif %}</td>
+                    <td style="padding: 1rem;">
+                        <span class="badge badge-{{ r.urgency }}">{{ r.get_urgency_display }}</span>
+                    </td>
+                    <td style="padding: 1rem;">
+                        <div style="display: flex; gap: 0.5rem;">
+                            <a href="{% url 'update_resource' r.id %}" class="btn" style="background: #3B82F6; color: white; padding: 0.4rem 0.8rem; font-size: 0.8rem; text-decoration: none;">Edit</a>
+                            <button type="button" class="btn" style="background: #EF4444; color: white; padding: 0.4rem 0.8rem; font-size: 0.8rem;" 
+                                    onclick="openDeleteModal('{% url 'delete_resource' r.id %}', '{{ r.title|escapejs }}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Reusing the same modal structure for simplicity -->
+<div id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: var(--bg-color); padding: 2rem; border-radius: 12px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid var(--border-color);">
+        <h3 style="margin-bottom: 1rem; color: var(--danger);">Delete Item</h3>
+        <p style="margin-bottom: 1.5rem; color: var(--text-color);">Are you sure you want to delete <strong id="deleteTargetName">this item</strong>? This action cannot be undone.</p>
+        
+        <form id="deleteForm" method="post" action="">
+            {% csrf_token %}
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button type="button" class="btn" style="background: #e0e0e0; border: none; color: #333;" onclick="closeDeleteModal()">Cancel</button>
+                <button type="submit" class="btn" style="background: var(--danger); color: white; border: none;">Yes, Delete it</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openDeleteModal(actionUrl, itemName) {
+        document.getElementById('deleteForm').action = actionUrl;
+        document.getElementById('deleteTargetName').textContent = itemName;
+        document.getElementById('deleteModal').style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('deleteModal')) {
+            closeDeleteModal();
+        }
+    }
+</script>
+{% endblock %}
