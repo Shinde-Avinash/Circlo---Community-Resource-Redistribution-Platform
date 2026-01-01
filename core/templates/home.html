@@ -1,10 +1,29 @@
 {% extends 'base.html' %}
 
+{% block extra_head %}
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>
+        #map-view { height: 600px; width: 100%; border-radius: 12px; z-index: 1; margin-bottom: 2rem; border: 1px solid var(--border-color); }
+        .view-toggle-btn { padding: 0.6rem 1rem; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); cursor: pointer; transition: all 0.2s; }
+        .view-toggle-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .view-toggle-btn:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; border-right: none; }
+        .view-toggle-btn:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-left: none; }
+    </style>
+{% endblock %}
+
 {% block content %}
 <div class="header-section" style="margin-bottom: 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
     <div>
         <h1>Nearby Resources</h1>
         <p style="color: var(--text-muted);">Showing available items within 50km of your location.</p>
+    </div>
+    
+    <div style="display: flex;">
+        <button id="listViewBtn" class="view-toggle-btn active" onclick="switchView('list')">List View</button>
+        <button id="mapViewBtn" class="view-toggle-btn" onclick="switchView('map')">Map View</button>
     </div>
     
     <form method="get" action="{% url 'home' %}" 
@@ -40,6 +59,10 @@
         {% endif %}
     </form>
 </div>
+
+
+
+<div id="map-view" style="display: none;"></div>
 
 <div id="resource-grid" class="resource-container">
     {% if categorized_resources and not request.GET.search and not request.GET.category %}
@@ -144,5 +167,73 @@
             closeModal();
         }
     }
-</script>
+    </script>
+    
+    {{ map_resources|json_script:"map-data" }}
+    
+    <script>
+        let map = null;
+        let mapInitialized = false;
+
+        function switchView(view) {
+            const listBtn = document.getElementById('listViewBtn');
+            const mapBtn = document.getElementById('mapViewBtn');
+            const listView = document.getElementById('resource-grid');
+            const mapView = document.getElementById('map-view');
+
+            if (view === 'list') {
+                listBtn.classList.add('active');
+                mapBtn.classList.remove('active');
+                listView.style.display = 'block';
+                mapView.style.display = 'none';
+            } else {
+                listBtn.classList.remove('active');
+                mapBtn.classList.add('active');
+                listView.style.display = 'none';
+                mapView.style.display = 'block';
+                
+                if (!mapInitialized) {
+                    initMap();
+                } else {
+                    setTimeout(() => { map.invalidateSize(); }, 100);
+                }
+            }
+        }
+
+        function initMap() {
+            // Default to Pune or User's Location passed from backend if available
+            // For now, let's use the first resource's location or a default center
+            const resources = JSON.parse(document.getElementById('map-data').textContent);
+            
+            let center = [18.5204, 73.8567]; // Default Pune
+            if (resources.length > 0) {
+                // Use first resource as center simply
+                center = [resources[0].latitude, resources[0].longitude];
+            }
+            
+            // Allow user location override if we had it in template context, but for now simple center
+            
+            map = L.map('map-view').setView(center, 12);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            resources.forEach(res => {
+                const marker = L.marker([res.latitude, res.longitude]).addTo(map);
+                
+                const popupContent = `
+                    <div style="min-width: 200px;">
+                        <h3 style="margin: 0 0 5px 0; font-size: 1rem;">${res.title}</h3>
+                        <p style="margin: 0 0 5px 0; font-size: 0.8rem; color: #666;">${res.category} • ${res.available_quantity} ${res.unit}</p>
+                        <a href="${res.url}" class="btn btn-primary" style="display: inline-block; padding: 3px 8px; font-size: 0.8rem; text-decoration: none; color: white; background: var(--primary-color, #007bff); border-radius: 4px;">View Details</a>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+            });
+            
+            mapInitialized = true;
+        }
+    </script>
 {% endblock %}

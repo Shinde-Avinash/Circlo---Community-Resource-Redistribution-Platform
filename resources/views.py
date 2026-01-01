@@ -19,10 +19,10 @@ def post_resource(request):
                 resource.latitude = request.user.latitude
                 resource.longitude = request.user.longitude
             
-            # If still no location, default to Bangalore Central for demo
+            # If still no location, default to Pune for demo
             if not resource.latitude:
-                 resource.latitude = 12.9716
-                 resource.longitude = 77.5946
+                 resource.latitude = 18.5204
+                 resource.longitude = 73.8567
 
             resource.save()
             messages.success(request, "Resource posted successfully!")

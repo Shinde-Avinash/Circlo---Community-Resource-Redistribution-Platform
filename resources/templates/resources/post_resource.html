@@ -2,6 +2,16 @@
 
 {% block title %}Post Resource{% endblock %}
 
+{% block extra_head %}
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>
+        #location-map { height: 400px; width: 100%; border-radius: 6px; border: 1px solid var(--border-color); }
+    </style>
+{% endblock %}
+
 {% block content %}
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 1200px; margin: 2rem auto;">
     
@@ -87,6 +97,7 @@
 
             <div style="margin-bottom: 1.5rem;">
                 <button type="button" class="btn" style="background: #e0e0e0; color: #333;" onclick="getLocation()">📍 Auto-detect My Location</button>
+                <button type="button" class="btn" style="background: #e0e0e0; color: #333; margin-left: 0.5rem;" onclick="openMapModal()">🗺️ Select on Map</button>
                 <span id="loc-status" style="margin-left: 1rem; font-size: 0.9rem; color: var(--text-muted);"></span>
             </div>
 
@@ -181,6 +192,21 @@
 </div>
 {% endif %}
 
+<!-- Map Selection Modal -->
+<div id="mapModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: var(--bg-color); padding: 1.5rem; border-radius: 12px; max-width: 600px; width: 95%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid var(--border-color);">
+        <h3 style="margin-bottom: 1rem; color: var(--primary-color);">Select Location</h3>
+        <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">Drag the marker to the correct position.</p>
+        
+        <div id="location-map"></div>
+        
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <button class="btn" style="background: #e0e0e0; border: none; color: #333;" onclick="closeMapModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="confirmLocation()">Confirm Location</button>
+        </div>
+    </div>
+</div>
+
 <script>
     let currentUnclaimForm = null;
 
@@ -215,12 +241,81 @@
     window.onclick = function(event) {
         const unclaimModal = document.getElementById('unclaimModal');
         const deleteModal = document.getElementById('deleteModal');
+        const mapModal = document.getElementById('mapModal');
         if (event.target == unclaimModal) {
             closeUnclaimModal();
         }
         if (deleteModal && event.target == deleteModal) {
             closeDeleteModal();
         }
+        if (event.target == mapModal) {
+            closeMapModal();
+        }
+    }
+
+    // Map Logic
+    let map = null;
+    let marker = null;
+    let selectedLat = 18.5204; // Default Pune
+    let selectedLng = 73.8567;
+
+    function openMapModal() {
+        document.getElementById('mapModal').style.display = 'flex';
+        
+        // Initialize map if not already done
+        if (!map) {
+            map = L.map('location-map').setView([selectedLat, selectedLng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+            
+            // Check if form has existing values
+            const formLat = parseFloat(document.querySelector('input[name="latitude"]').value);
+            const formLng = parseFloat(document.querySelector('input[name="longitude"]').value);
+            
+            if (!isNaN(formLat) && !isNaN(formLng)) {
+                selectedLat = formLat;
+                selectedLng = formLng;
+            }
+            
+            marker = L.marker([selectedLat, selectedLng], {draggable: true}).addTo(map);
+            map.setView([selectedLat, selectedLng], 13);
+
+            marker.on('dragend', function(e) {
+                const pos = e.target.getLatLng();
+                selectedLat = pos.lat;
+                selectedLng = pos.lng;
+            });
+
+            // Click map to move marker
+            map.on('click', function(e) {
+                marker.setLatLng(e.latlng);
+                selectedLat = e.latlng.lat;
+                selectedLng = e.latlng.lng;
+            });
+        } else {
+             // Refresh state in case form changed externally or re-opened
+            const formLat = parseFloat(document.querySelector('input[name="latitude"]').value);
+            const formLng = parseFloat(document.querySelector('input[name="longitude"]').value);
+             if (!isNaN(formLat) && !isNaN(formLng)) {
+                selectedLat = formLat;
+                selectedLng = formLng;
+                marker.setLatLng([selectedLat, selectedLng]);
+                map.setView([selectedLat, selectedLng], 13);
+            }
+            setTimeout(() => { map.invalidateSize(); }, 100);
+        }
+    }
+
+    function closeMapModal() {
+        document.getElementById('mapModal').style.display = 'none';
+    }
+
+    function confirmLocation() {
+        document.querySelector('input[name="latitude"]').value = selectedLat.toFixed(6);
+        document.querySelector('input[name="longitude"]').value = selectedLng.toFixed(6);
+        document.getElementById('loc-status').textContent = "Location selected from map!";
+        closeMapModal();
     }
 </script>
 {% endblock %}

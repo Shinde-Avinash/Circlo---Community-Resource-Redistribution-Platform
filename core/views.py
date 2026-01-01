@@ -43,11 +43,27 @@ def home(request):
         # For simplicity, let's keep list sorting
         resources_list = list(resources)
         resources_list.sort(key=lambda x: urgency_map.get(x.urgency, 3))
-        return render(request, 'home.html', {'resources': resources_list})
+        
+        # Serialize for map (Authentication not required for basic map)
+        map_resources = []
+        for res in resources_list:
+             map_resources.append({
+                'id': res.id,
+                'title': res.title,
+                'latitude': res.latitude,
+                'longitude': res.longitude,
+                'category': res.category,
+                'urgency': res.urgency,
+                'available_quantity': res.available_quantity,
+                'unit': res.unit,
+                'url': f"/resources/{res.id}/", 
+            })
+            
+        return render(request, 'home.html', {'resources': resources_list, 'map_resources': map_resources})
 
     # User is logged in, apply location filtering
-    user_lat = request.user.latitude if request.user.latitude else 12.9716
-    user_long = request.user.longitude if request.user.longitude else 77.5946
+    user_lat = request.user.latitude if request.user.latitude else 18.5204
+    user_long = request.user.longitude if request.user.longitude else 73.8567
         
     nearby_resources = []
     for res in resources:
@@ -63,7 +79,20 @@ def home(request):
 
     # If Search or Filter is active, pass flat list
     if search_query or category_filter:
-        return render(request, 'home.html', {'resources': nearby_resources})
+        map_resources = []
+        for res in nearby_resources:
+            map_resources.append({
+                'id': res.id,
+                'title': res.title,
+                'latitude': res.latitude,
+                'longitude': res.longitude,
+                'category': res.category,
+                'urgency': res.urgency,
+                'available_quantity': res.available_quantity,
+                'unit': res.unit,
+                'url': f"/resources/{res.id}/",
+            })
+        return render(request, 'home.html', {'resources': nearby_resources, 'map_resources': map_resources})
 
     # Otherwise, group by category for "Netflix-style" section display
     # Preferred Order: Food -> Clothing -> Supplies -> Furniture -> Books -> Other
@@ -85,11 +114,30 @@ def home(request):
     if other_items:
         categorized_resources.append({'name': 'Others', 'items': other_items})
 
+    # Serialize resources for the map
+    map_resources = []
+    # Use nearby_resources if logged in, otherwise use all visible resources (resources_list)
+    # Note: access `resources_list` if user not authenticated
+    
+    target_list = nearby_resources if request.user.is_authenticated else resources_list
+    
+    for res in target_list:
+        map_resources.append({
+            'id': res.id,
+            'title': res.title,
+            'latitude': res.latitude,
+            'longitude': res.longitude,
+            'category': res.category,
+            'urgency': res.urgency,
+            'available_quantity': res.available_quantity,
+            'unit': res.unit,
+            'url': f"/resources/{res.id}/", # Hardcoding url path to avoid reverse complexity in loop, or could use reverse
+        })
+
     return render(request, 'home.html', {
         'categorized_resources': categorized_resources,
-        # We also pass 'resources' just in case template logic needs a fallback/count, 
-        # though main loop will check categorized_resources first.
-        'resources': nearby_resources 
+        'resources': nearby_resources,
+        'map_resources': map_resources
     })
 
 @login_required
