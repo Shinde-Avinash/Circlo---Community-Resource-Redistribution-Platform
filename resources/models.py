@@ -40,6 +40,13 @@ class Resource(models.Model):
     
     image = models.ImageField(upload_to='resources/', blank=True, null=True)
     
+    DELIVERY_CHOICES = (
+        ('pickup', 'Pickup Only'),
+        ('dropoff', 'I can deliver'),
+        ('both', 'Flexible (Pickup or Drop-off)'),
+    )
+    delivery_method = models.CharField(max_length=10, choices=DELIVERY_CHOICES, default='pickup')
+
     pickup_window = models.CharField(max_length=200, help_text="e.g., 'Today 3PM-6PM'")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

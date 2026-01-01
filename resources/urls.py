@@ -10,5 +10,6 @@ urlpatterns = [
     path('delete/<int:resource_id>/', views.delete_resource, name='delete_resource'),
     path('claim/<int:resource_id>/', views.claim_resource, name='claim_resource'),
     path('unclaim/<int:resource_id>/', views.unclaim_resource, name='unclaim_resource'),
+    path('mark_received/<int:claim_id>/', views.mark_received, name='mark_received'),
     # Force reload
 ]

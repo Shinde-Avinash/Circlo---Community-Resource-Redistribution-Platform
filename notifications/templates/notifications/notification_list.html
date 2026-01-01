@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 2rem auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1>Notifications</h1>
+        {% if notifications %}
+        <form action="{% url 'clear_notifications' %}" method="post">
+            {% csrf_token %}
+            <button class="btn btn-outline">Generic Clear All</button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="card" style="padding: 0;">
+        {% if notifications %}
+            {% for n in notifications %}
+            <a href="{% url 'mark_as_read' n.id %}" style="text-decoration: none; color: inherit; display: block;">
+                <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); transition: background 0.2s; {% if not n.is_read %}background: var(--bg-body, #f8fafc); border-left: 4px solid var(--primary-color);{% else %}background: transparent; border-left: 4px solid transparent;{% endif %}" 
+                     onmouseover="this.style.background='var(--bg-secondary)'" 
+                     onmouseout="this.style.background='{% if not n.is_read %}var(--bg-body, #f8fafc){% else %}transparent{% endif %}'">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                        <span style="font-weight: 600; font-size: 1.1rem; color: var(--primary-color); display: flex; align-items: center; gap: 0.5rem;">
+                            {% if n.notification_type == 'message' %}
+                                💬 New Message
+                            {% elif n.notification_type == 'claim' %}
+                                🎁 Item Claimed
+                            {% else %}
+                                🔔 Notification
+                            {% endif %}
+                        </span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">{{ n.created_at|timesince }} ago</span>
+                    </div>
+                    
+                    <p style="margin: 0; font-size: 1rem; color: var(--text-color); line-height: 1.5;">
+                        {{ n.message }}
+                    </p>
+                </div>
+            </a>
+            {% endfor %}
+        {% else %}
+            <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                No notifications yet.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

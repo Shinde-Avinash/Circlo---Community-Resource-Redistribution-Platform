@@ -1,9 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
+from django.utils import timezone
 from .models import Resource, Claim
 from .forms import ResourceForm
 
@@ -146,10 +144,20 @@ def claim_resource(request, resource_id):
             return redirect('resource_detail', resource_id=resource_id)
         
         # Create Claim Record
-        Claim.objects.create(
+        claim = Claim.objects.create(
             resource=resource,
             claimant=request.user,
             quantity=claim_qty
+        )
+        
+        # Notify Donor
+        from notifications.models import Notification
+        Notification.objects.create(
+            recipient=resource.donor,
+            actor=request.user,
+            message=f"{request.user.username} claimed {claim_qty} {resource.unit} of {resource.title}",
+            link=f"/users/manage/resources/",  # Point to dashboard
+            notification_type='claim'
         )
         
         # Decrement Inventory
@@ -194,3 +202,35 @@ def unclaim_resource(request, resource_id):
         return redirect('post_resource')
     
     return redirect('home')
+
+@login_required
+def mark_received(request, claim_id):
+    """Allow claimant to manually confirm receipt of the item."""
+    claim = get_object_or_404(Claim, id=claim_id)
+    
+    # Permission check: Only the claimant can mark as received
+    if request.user != claim.claimant:
+        messages.error(request, "You are not authorized to confirm this claim.")
+        return redirect('manage_resources')
+    
+    if request.method == 'POST':
+        if not claim.is_verified:
+            claim.is_verified = True
+            claim.verified_at = timezone.now()
+            claim.save()
+            
+            # Notify Donor about confirmation
+            from notifications.models import Notification
+            Notification.objects.create(
+                recipient=claim.resource.donor,
+                actor=request.user,
+                message=f"{request.user.username} confirmed receipt of {claim.resource.title}",
+                link=f"/users/manage/resources/",
+                notification_type='claim'
+            )
+            
+            messages.success(request, f"You have confirmed receipt of {claim.resource.title}. Thank you!")
+        else:
+            messages.info(request, "This item is already marked as received.")
+            
+    return redirect('manage_resources')

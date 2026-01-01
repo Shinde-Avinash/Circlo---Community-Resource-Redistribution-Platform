@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'users',
     'resources',
     'messaging',
+    'notifications',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -137,3 +138,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
+# Force Reload for Notifications App

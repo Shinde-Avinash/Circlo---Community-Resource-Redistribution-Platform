@@ -32,6 +32,7 @@
             </div>
             <div>
                 <h3 style="color: var(--accent-color);">Logistics</h3>
+                <p><strong>Delivery:</strong> {{ resource.get_delivery_method_display }}</p>
                 <p><strong>Quantity:</strong> {{ resource.quantity }}</p>
                 <p><strong>Pickup Window:</strong> {{ resource.pickup_window }}</p>
                 <p><strong>Location:</strong> {{ resource.latitude|default:"N/A" }}, {{ resource.longitude|default:"N/A" }}</p>

@@ -70,6 +70,18 @@ def send_message(request, pk):
             # Update conversation timestamp
             conversation.save()
             
+            # Create Notification
+            from notifications.models import Notification
+            recipient = conversation.participants.exclude(id=request.user.id).first()
+            if recipient:
+                Notification.objects.create(
+                    recipient=recipient,
+                    actor=request.user,
+                    message=f"New message from {request.user.username}",
+                    link=f"/messages/chat/{conversation.id}/",
+                    notification_type='message'
+                )
+
             # Return the updated message list partial
             chat_messages = conversation.messages.all()
             return render(request, 'messaging/message_list_partial.html', {'chat_messages': chat_messages, 'user': request.user})

@@ -9,7 +9,7 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' style="display: flex; flex-direction: column; min-height: 100vh; margin: 0;">
 
 <nav class="navbar">
     <div style="max-width: 1200px; margin: 0 auto; width: 100%; display: flex; justify-content: space-between; align-items: center;">
@@ -21,11 +21,15 @@
             <a href="{% url 'leaderboard' %}" class="nav-link {% if request.resolver_match.url_name == 'leaderboard' %}active{% endif %}">Leaderboard</a>
             {% if user.is_authenticated %}
                 {% if user.role == 'moderator' or user.is_superuser %}
-                    <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" style="color: #EF4444; font-weight: bold;">Admin Dashboard</a>
+                    <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" style="color: #EF4444; font-weight: bold;">Dashboard</a>
                 {% endif %}
                 <a href="{% url 'post_resource' %}" class="nav-link {% if request.resolver_match.url_name == 'post_resource' %}active{% endif %}">Post Item</a>
-                <a href="{% url 'manage_resources' %}" class="nav-link {% if request.resolver_match.url_name == 'manage_resources' %}active{% endif %}">My Activity</a>
-                <a href="{% url 'inbox' %}" class="nav-link {% if request.resolver_match.url_name == 'inbox' %}active{% endif %}">Messages</a>
+                <a href="{% url 'manage_resources' %}" class="nav-link {% if request.resolver_match.url_name == 'manage_resources' %}active{% endif %}">Activity</a>
+                <a href="{% url 'inbox' %}" class="nav-link {% if request.resolver_match.url_name == 'inbox' %}active{% endif %}">Inbox</a>
+                <a href="{% url 'notification_list' %}" class="nav-link" style="position: relative; display: flex; align-items: center;">
+                    🔔
+                    <span id="notification-badge" style="display: none; position: absolute; top: 0px; right: -5px; background: #EF4444; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; align-items: center; justify-content: center;"></span>
+                </a>
                 <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" style="margin-left: 2rem; color: var(--text-color); font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
                     <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border: 2px solid white;">
                         {% if user.profile_image %}
@@ -51,7 +55,7 @@
     </div>
 </nav>
 
-<div class="container">
+<div class="container" style="flex: 1; width: 100%; max-width: 1200px; margin: 0 auto; padding: 2rem 1rem;">
     {% if messages %}
         <div class="messages">
             {% for message in messages %}
@@ -64,8 +68,51 @@
     {% endblock %}
 </div>
 
-<footer style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem;">
-    &copy; 2025 Community Resource Redistribution Platform.
+<!-- Modern Footer -->
+<footer style="background: var(--bg-card); border-top: 1px solid var(--border-color); padding: 4rem 1rem 2rem 1rem; margin-top: auto;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; margin-bottom: 3rem;">
+            
+            <!-- Brand Column -->
+            <div>
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem; font-size: 1.5rem;">Circlo</h3>
+                <p style="color: var(--text-muted); line-height: 1.6;">
+                    Connect, share, and redistribute resources within your community. Together we can reduce waste and help each other.
+                </p>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <a href="#" style="text-decoration: none; font-size: 1.2rem;">🐦</a>
+                    <a href="#" style="text-decoration: none; font-size: 1.2rem;">📘</a>
+                    <a href="#" style="text-decoration: none; font-size: 1.2rem;">📸</a>
+                </div>
+            </div>
+
+            <!-- Links Column -->
+            <div>
+                <h4 style="color: var(--text-color); margin-bottom: 1rem;">Community</h4>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.8rem;">
+                    <li><a href="{% url 'home' %}" style="text-decoration: none; color: var(--text-muted); transition: color 0.2s;">Recent Posts</a></li>
+                    <li><a href="{% url 'leaderboard' %}" style="text-decoration: none; color: var(--text-muted); transition: color 0.2s;">Top Donors</a></li>
+                    <li><a href="#" style="text-decoration: none; color: var(--text-muted); transition: color 0.2s;">Guidelines</a></li>
+                    <li><a href="#" style="text-decoration: none; color: var(--text-muted); transition: color 0.2s;">Success Stories</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact/Connect Column -->
+            <div>
+                <h4 style="color: var(--text-color); margin-bottom: 1rem;">Connect</h4>
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">support@circlo.local</p>
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">Pune, Maharashtra</p>
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'register' %}" class="btn btn-primary" style="margin-top: 1rem; display: inline-block;">Join the Movement</a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Copyright -->
+        <div style="border-top: 1px solid var(--border-color); padding-top: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+            <p>&copy; {% now "Y" %} Circlo Platform. Built with ❤️ for the community.</p>
+        </div>
+    </div>
 </footer>
 
 <script>
@@ -80,6 +127,33 @@
     // Initialize Theme
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
+
+    // Notification Polling
+    function updateNotifications() {
+        const badge = document.getElementById('notification-badge');
+        if (!badge) return;
+
+        fetch('{% url "notification_count" %}')
+        .then(response => {
+            if (response.ok) return response.json();
+            throw new Error('Network response was not ok');
+        })
+        .then(data => {
+            if (data.count > 0) {
+                badge.style.display = 'flex';
+                badge.innerText = data.count > 9 ? '9+' : data.count;
+            } else {
+                badge.style.display = 'none';
+            }
+        })
+        .catch(error => console.log('Notification poll error', error));
+    }
+
+    // Poll every 15 seconds if user is logged in (badge exists)
+    if (document.getElementById('notification-badge')) {
+        updateNotifications(); // Initial check
+        setInterval(updateNotifications, 15000);
+    }
 </script>
 
 </body>
