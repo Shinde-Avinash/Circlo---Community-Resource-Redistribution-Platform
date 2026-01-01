@@ -26,6 +26,10 @@ def home(request):
     # Search and Filtering
     search_query = request.GET.get('search', '')
     category_filter = request.GET.get('category', '')
+    type_filter = request.GET.get('type', 'offer') # Default to 'offer'
+    
+    if type_filter:
+        resources = resources.filter(resource_type=type_filter)
     
     if search_query:
         from django.db.models import Q
@@ -191,3 +195,36 @@ def dashboard(request):
         'recent_users': recent_users,
     }
     return render(request, 'dashboard.html', context)
+
+def leaderboard(request):
+    from django.db.models import Count
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    
+    # Aggregate resources count per user
+    top_donors = User.objects.annotate(resource_count=Count('resources')).filter(resource_count__gt=0).order_by('-resource_count')[:20]
+    
+    # Process badges
+    ranked_donors = []
+    for index, donor in enumerate(top_donors):
+        rank = index + 1
+        badge = None
+        if rank == 1:
+            badge = '🥇 Gold Donor'
+        elif rank == 2:
+            badge = '🥈 Silver Donor'
+        elif rank == 3:
+            badge = '🥉 Bronze Donor'
+        elif donor.resource_count >= 5:
+            badge = '🌟 Sustainability Champion'
+        elif donor.resource_count >= 1:
+            badge = '✅ Verified'
+            
+        ranked_donors.append({
+            'rank': rank,
+            'user': donor,
+            'count': donor.resource_count,
+            'badge': badge
+        })
+        
+    return render(request, 'leaderboard.html', {'ranked_donors': ranked_donors})

@@ -47,13 +47,16 @@ def manage_users(request):
 
 @login_required
 def manage_resources(request):
-    if not (request.user.role == 'moderator' or request.user.is_superuser):
-        messages.error(request, "Access Denied.")
-        return redirect('home')
-
-    from resources.models import Resource
-    resources = Resource.objects.all().order_by('-created_at')
-    return render(request, 'users/manage_resources.html', {'resources': resources})
+    from resources.models import Resource, Claim
+    if request.user.is_superuser or request.user.role == 'moderator':
+        resources = Resource.objects.all().order_by('-created_at')
+    else:
+        resources = Resource.objects.filter(donor=request.user).order_by('-created_at')
+    
+    # Use prefetch_related if needed, but for now simple filter
+    claims = Claim.objects.filter(claimant=request.user).select_related('resource', 'resource__donor').order_by('-claimed_at')
+    
+    return render(request, 'users/manage_resources.html', {'resources': resources, 'claims': claims})
 
 @login_required
 def delete_user(request, user_id):

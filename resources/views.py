@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Resource
+from .models import Resource, Claim
 from .forms import ResourceForm
 
 @login_required
@@ -64,7 +64,6 @@ def update_resource(request, resource_id):
     
     # Fetch user's history for sidebar
     posted_resources = Resource.objects.filter(donor=request.user).order_by('-created_at')
-    from .models import Claim
     my_claims = Claim.objects.filter(claimant=request.user).order_by('-claimed_at')
     
     return render(request, 'resources/post_resource.html', {
@@ -73,6 +72,36 @@ def update_resource(request, resource_id):
         'posted_resources': posted_resources,
         'my_claims': my_claims
     })
+
+def verify_claim(request, token):
+    try:
+        claim = Claim.objects.get(verification_token=token)
+        
+        # Ensure only the donor can verify (or maybe just allow open verification if the URL is secret? 
+        # Ideally, donor should be logged in, but for ease of use at pickup, open link might be okay if token is high entropy UUID.
+        # But let's check for donor authentication for security if possible, OR show a confirmation page for the donor to click "Confirm".
+        # SIMPLIFIED FOR DEMO: If user is logged in and is donor -> verify. Else show info.
+        
+        if request.user.is_authenticated and request.user == claim.resource.donor:
+            if not claim.is_verified:
+                claim.is_verified = True
+                claim.verified_at = timezone.now()
+                claim.save()
+                messages.success(request, f"Successfully verified claim for {claim.resource.title}!")
+            else:
+                messages.info(request, "This claim has already been verified.")
+        elif not request.user.is_authenticated:
+             # Redirect to login with next param
+             return redirect(f'/accounts/login/?next={request.path}')
+        else:
+             messages.error(request, "You are not authorized to verify this claim.")
+             return redirect('home')
+             
+        return redirect('dashboard')
+        
+    except Claim.DoesNotExist:
+        messages.error(request, "Invalid verification link.")
+        return redirect('home')
 
 @login_required
 def delete_resource(request, resource_id):

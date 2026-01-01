@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Leaderboard{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 2rem auto;">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h1 style="color: var(--primary-color, #2E7D32); margin-bottom: 0.5rem; font-size: 2.5rem;">🏆 Community Leaderboard</h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">Celebrate our top contributors who are making a difference!</p>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+        <!-- Header -->
+        <div style="display: grid; grid-template-columns: 80px 1fr 150px; background: var(--primary-color, #2E7D32); color: white; padding: 1.2rem 1.5rem; font-weight: 600; letter-spacing: 0.5px;">
+            <div style="text-align: center;">Rank</div>
+            <div>Donor</div>
+            <div style="text-align: center;">Donations</div>
+        </div>
+
+        {% if ranked_donors %}
+            <div style="background: var(--bg-color);">
+                {% for item in ranked_donors %}
+                <div style="display: grid; grid-template-columns: 80px 1fr 150px; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border-color); align-items: center; transition: background 0.2s hover;" class="leaderboard-row">
+                    <!-- Rank -->
+                    <div style="text-align: center; font-weight: bold; font-size: 1.2rem; color: var(--text-color);">
+                        {% if item.rank == 1 %}🥇{% elif item.rank == 2 %}🥈{% elif item.rank == 3 %}🥉{% else %}#{{ item.rank }}{% endif %}
+                    </div>
+                    
+                    <!-- Donor Profile -->
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; overflow: hidden; background: #eee;">
+                            {% if item.user.profile_image %}
+                                <img src="{{ item.user.profile_image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--secondary-color); color: white; font-size: 1.2rem;">
+                                    {{ item.user.username|make_list|first|upper }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 1.1rem; color: var(--text-color);">
+                                {{ item.user.username }}
+                                {% if item.user.is_verified %}
+                                    <span title="Verified" style="color: #3B82F6;">✓</span>
+                                {% endif %}
+                            </div>
+                            {% if item.badge %}
+                                <div style="font-size: 0.85rem; color: #D97706; font-weight: 500; margin-top: 0.2rem;">
+                                    {{ item.badge }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Count -->
+                    <div style="text-align: center;">
+                        <span style="font-size: 1.4rem; font-weight: 700; color: var(--primary-color);">{{ item.count }}</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">items</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="padding: 3rem; text-align: center; color: var(--text-muted);">
+                <p>No donations yet. Be the first to climb the leaderboard!</p>
+                <a href="{% url 'post_resource' %}" class="btn btn-primary" style="margin-top: 1rem;">Post an Item</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .leaderboard-row:hover {
+        background-color: rgba(0,0,0,0.02);
+    }
+</style>
+{% endblock %}

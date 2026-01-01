@@ -8,7 +8,12 @@
 
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
                 <span class="badge badge-{{ res.urgency }}" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">
-                    {{ res.get_urgency_display }}
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span class="category-badge">{{ res.category|title }}</span>
+                    {% if res.resource_type == 'request' %}
+                         <span class="badge" style="background: #9333EA; color: white;">🙋 Request</span>
+                    {% endif %}
+                </div>
                 </span>
                 <span style="font-size: 0.75rem; color: var(--text-muted);">
                     {{ res.distance_km }} km
@@ -27,6 +32,12 @@
                 <!-- Stop propagation to prevent card click when interacting with buttons/badges -->
                 <span style="font-size: 0.8rem; color: var(--accent-color);" onclick="event.stopPropagation()">
                     @{{ res.donor.username }}
+                    {% if res.donor.is_verified %}
+                        <span title="Verified" style="color: #3B82F6;">✓</span>
+                    {% endif %}
+                    {% if res.donor.resources.count >= 5 %}
+                        <span title="Sustainability Champion">🌟</span>
+                    {% endif %}
                 </span>
                 {% if user.is_authenticated %}
                     {% if res.donor == user %}

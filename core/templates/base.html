@@ -18,11 +18,13 @@
         </a>
         <div class="navbar-links" style="display: flex; align-items: center;">
             <a href="/" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Feed</a>
+            <a href="{% url 'leaderboard' %}" class="nav-link {% if request.resolver_match.url_name == 'leaderboard' %}active{% endif %}">Leaderboard</a>
             {% if user.is_authenticated %}
                 {% if user.role == 'moderator' or user.is_superuser %}
                     <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" style="color: #EF4444; font-weight: bold;">Admin Dashboard</a>
                 {% endif %}
                 <a href="{% url 'post_resource' %}" class="nav-link {% if request.resolver_match.url_name == 'post_resource' %}active{% endif %}">Post Item</a>
+                <a href="{% url 'manage_resources' %}" class="nav-link {% if request.resolver_match.url_name == 'manage_resources' %}active{% endif %}">My Activity</a>
                 <a href="{% url 'inbox' %}" class="nav-link {% if request.resolver_match.url_name == 'inbox' %}active{% endif %}">Messages</a>
                 <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" style="margin-left: 2rem; color: var(--text-color); font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
                     <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border: 2px solid white;">

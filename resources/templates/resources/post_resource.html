@@ -77,22 +77,55 @@
 
     <!-- Right Column: Post Form -->
     <div class="card" style="height: fit-content;">
-        <h2 style="border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">{{ title|default:"Post a New Resource" }}</h2>
+        <h2 id="form-title" style="border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">{{ title|default:"Post a New Resource" }}</h2>
         
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             
             {% for field in form %}
-            <div style="margin-bottom: 1.5rem;">
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ field.label }}</label>
+            
+            {% if field.name == 'resource_type' %}
+                <div style="margin-bottom: 2rem; display: flex; gap: 1rem; justify-content: center;">
+                    {% for radio in field %}
+                    <label class="type-option" style="cursor: pointer;">
+                        {{ radio.tag }}
+                        <span class="type-card">
+                           {% if 'Offer' in radio.choice_label %}🙌 Give Help{% else %}🙋 Seek Help{% endif %}
+                        </span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <style>
+                    .type-option input { display: none; }
+                    .type-card {
+                        display: block;
+                        padding: 1rem 2rem;
+                        border: 2px solid var(--border-color);
+                        border-radius: 8px;
+                        font-weight: 600;
+                        color: var(--text-muted);
+                        transition: all 0.2s;
+                    }
+                    .type-option input:checked + .type-card {
+                        border-color: var(--primary-color);
+                        background: rgba(46, 125, 50, 0.1);
+                        color: var(--primary-color);
+                    }
+                </style>
+            {% else %}
+            
+            <div style="margin-bottom: 1.5rem;" id="field-container-{{ field.name }}">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;" id="label-{{ field.name }}">{{ field.label }}</label>
                 {{ field }}
                 {% if field.help_text %}
-                    <small style="color: var(--text-muted); display: block;">{{ field.help_text }}</small>
+                    <small style="color: var(--text-muted); display: block;" id="help-{{ field.name }}">{{ field.help_text }}</small>
                 {% endif %}
                 {% if field.errors %}
                     <div style="color: var(--status-red);">{{ field.errors }}</div>
                 {% endif %}
             </div>
+            
+            {% endif %}
             {% endfor %}
 
             <div style="margin-bottom: 1.5rem;">
@@ -102,7 +135,7 @@
             </div>
 
             <div style="display: flex; gap: 1rem;">
-                <button type="submit" class="btn btn-primary" style="flex: 1;">Save Resource</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1;" id="submit-btn">Save Resource</button>
                 {% if form.instance.pk %}
                     <button type="button" class="btn" style="background: var(--danger); color: white; border: none; flex: 1;" onclick="openDeleteModal()">Delete Resource</button>
                 {% endif %}
@@ -317,5 +350,46 @@
         document.getElementById('loc-status').textContent = "Location selected from map!";
         closeMapModal();
     }
+
+    // Dynamic Form Labels
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeRadios = document.querySelectorAll('input[name="resource_type"]');
+        const quantityLabel = document.getElementById('label-available_quantity');
+        const imageLabel = document.getElementById('label-image');
+        const pickupLabel = document.getElementById('label-pickup_window');
+        const formTitle = document.getElementById('form-title');
+        const submitBtn = document.getElementById('submit-btn');
+        
+        function updateLabels(type) {
+            if (type === 'request') {
+                if(quantityLabel) quantityLabel.textContent = "Quantity Needed";
+                if(imageLabel) imageLabel.textContent = "Reference Image (Optional)";
+                if(pickupLabel) pickupLabel.textContent = "Best Time to Receive";
+                if(formTitle && !formTitle.dataset.editing) formTitle.textContent = "Request a Resource";
+                if(submitBtn) submitBtn.textContent = "Post Request";
+            } else {
+                if(quantityLabel) quantityLabel.textContent = "Available Quantity";
+                if(imageLabel) imageLabel.textContent = "Upload Image";
+                if(pickupLabel) pickupLabel.textContent = "Pickup Window";
+                if(formTitle && !formTitle.dataset.editing) formTitle.textContent = "Post a Resource";
+                if(submitBtn) submitBtn.textContent = "Post Donation";
+            }
+        }
+
+        // Check if we are editing (title shouldn't change if it's "Edit Resource")
+        if (formTitle && formTitle.textContent.includes('Edit')) {
+             formTitle.dataset.editing = "true";
+        }
+
+        // Init
+        typeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => updateLabels(e.target.value));
+            if (radio.checked) updateLabels(radio.value);
+        });
+        
+        // Default check if none checked (usually one is checked by default if set in form, but just in case)
+        const checked = document.querySelector('input[name="resource_type"]:checked');
+        if (checked) updateLabels(checked.value);
+    });
 </script>
 {% endblock %}

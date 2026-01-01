@@ -4,8 +4,9 @@ from .models import Resource
 class ResourceForm(forms.ModelForm):
     class Meta:
         model = Resource
-        fields = ['title', 'description', 'category', 'available_quantity', 'unit', 'urgency', 'pickup_window', 'image', 'latitude', 'longitude']
+        fields = ['resource_type', 'title', 'description', 'category', 'available_quantity', 'unit', 'urgency', 'pickup_window', 'image', 'latitude', 'longitude']
         widgets = {
+            'resource_type': forms.RadioSelect(attrs={'class': 'type-selector'}),
             'description': forms.Textarea(attrs={'rows': 3}),
             'urgency': forms.Select(attrs={'class': 'urgency-select'}),
         }

@@ -22,6 +22,12 @@ class Resource(models.Model):
     description = models.TextField()
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     
+    TYPE_CHOICES = (
+        ('offer', 'Offer (Giving away)'),
+        ('request', 'Request (Need help)'),
+    )
+    resource_type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='offer')
+    
     # New Quantity Fields for Partial Claims
     available_quantity = models.PositiveIntegerField(default=1, help_text="Number of items available")
     unit = models.CharField(max_length=50, default="items", help_text="e.g., kg, liters, packets, pieces")
@@ -50,6 +56,12 @@ class Claim(models.Model):
     claimant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='claims')
     quantity = models.PositiveIntegerField(default=1)
     claimed_at = models.DateTimeField(auto_now_add=True)
+    
+    # Verification
+    import uuid
+    verification_token = models.UUIDField(default=uuid.uuid4, editable=False)
+    is_verified = models.BooleanField(default=False)
+    verified_at = models.DateTimeField(null=True, blank=True)
     
     def __str__(self):
         return f"{self.claimant.username} claimed {self.quantity} of {self.resource.title}"
