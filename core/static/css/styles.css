@@ -49,64 +49,174 @@ body {
 .navbar {
     background-color: var(--card-bg);
     border-bottom: 1px solid var(--border-color);
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 0 1.5rem;
+    height: 64px; /* Fixed compact height */
     position: sticky;
     top: 0;
     z-index: 100;
     box-shadow: var(--shadow-sm);
-    backdrop-filter: blur(8px);
-    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.95);
+    display: flex;
+    align-items: center;
 }
 
 [data-theme="dark"] .navbar {
-    background-color: rgba(31, 41, 55, 0.9);
+    background-color: rgba(31, 41, 55, 0.95);
+}
+
+.navbar-container {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .navbar-brand {
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.4rem;
+    font-weight: 800;
     text-decoration: none;
     color: var(--primary-color);
-    letter-spacing: -0.025em;
+    flex-shrink: 0;
 }
 
-.navbar-links a {
-    color: var(--text-color);
+.navbar-center {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    justify-content: center;
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+.nav-link {
     text-decoration: none;
-    margin-left: 2rem;
+    color: var(--text-muted);
     font-weight: 500;
-    font-size: 0.95rem;
-    transition: color 0.2s;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
 }
 
-.navbar-links a:hover {
+.nav-link:hover {
     color: var(--primary-color);
+    background: rgba(0,0,0,0.03);
 }
+
+.nav-link.active {
+    background-color: var(--primary-color);
+    color: white !important;
+}
+
+/* User Menu & Icons */
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-color);
+    padding: 0.25rem 0.4rem 0.25rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid var(--border-color);
+}
+
+.profile-link {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.avatar-small {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--secondary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.avatar-small img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0.4rem;
+    border-radius: 50%;
+    transition: background 0.2s;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+.badge-dot {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    background: #EF4444;
+    border-radius: 50%;
+    display: none;
+    border: 1px solid var(--card-bg);
+}
+
+.logout-btn {
+    font-size: 1rem;
+    color: var(--text-muted);
+}
+.logout-btn:hover { color: var(--danger); }
+
 
 /* Layout */
 .container {
     max-width: 1200px;
-    margin: 3rem auto;
+    margin: 2rem auto; /* Reduced margin */
     padding: 0 1.5rem;
 }
 
-/* Cards */
+/* Cards (Compact) */
 .card {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
-    padding: 2rem;
+    padding: 1.5rem; /* Compact padding */
     box-shadow: var(--shadow-sm);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px); /* Subtle lift */
+    box-shadow: var(--shadow-md);
 }
+
 
 .auth-container {
     max-width: 480px;
@@ -379,25 +489,4 @@ label {
     background-color: var(--border-color);
 }
 
-.nav-link {
-    text-decoration: none;
-    color: var(--text-muted);
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    transition: all 0.2s;
-}
 
-.nav-link:hover {
-    background: rgba(0,0,0,0.05);
-    color: var(--primary-color);
-}
-
-.nav-link.active {
-    background: var(--primary-color) !important;
-    color: white !important;
-}
-
-[data-theme="dark"] .nav-link:hover {
-    background: rgba(255,255,255,0.1);
-}

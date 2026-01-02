@@ -12,45 +12,56 @@
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' style="display: flex; flex-direction: column; min-height: 100vh; margin: 0;">
 
 <nav class="navbar">
-    <div style="max-width: 1200px; margin: 0 auto; width: 100%; display: flex; justify-content: space-between; align-items: center;">
+    <div class="navbar-container">
+        <!-- 1. Brand -->
         <a href="/" class="navbar-brand">
             <span style="color: var(--primary-color);">Circlo</span>
         </a>
-        <div class="navbar-links" style="display: flex; align-items: center;">
+
+        <!-- 2. Navigation Links (Center) -->
+        <div class="navbar-center">
             <a href="/" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Feed</a>
             <a href="{% url 'leaderboard' %}" class="nav-link {% if request.resolver_match.url_name == 'leaderboard' %}active{% endif %}">Leaderboard</a>
             {% if user.is_authenticated %}
-                {% if user.role == 'moderator' or user.is_superuser %}
-                    <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" style="color: #EF4444; font-weight: bold;">Dashboard</a>
-                {% endif %}
-                <a href="{% url 'post_resource' %}" class="nav-link {% if request.resolver_match.url_name == 'post_resource' %}active{% endif %}">Post Item</a>
+                <a href="{% url 'post_resource' %}" class="nav-link {% if request.resolver_match.url_name == 'post_resource' %}active{% endif %}">Post</a>
                 <a href="{% url 'manage_resources' %}" class="nav-link {% if request.resolver_match.url_name == 'manage_resources' %}active{% endif %}">Activity</a>
                 <a href="{% url 'inbox' %}" class="nav-link {% if request.resolver_match.url_name == 'inbox' %}active{% endif %}">Inbox</a>
-                <a href="{% url 'notification_list' %}" class="nav-link" style="position: relative; display: flex; align-items: center;">
-                    🔔
-                    <span id="notification-badge" style="display: none; position: absolute; top: 0px; right: -5px; background: #EF4444; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; align-items: center; justify-content: center;"></span>
-                </a>
-                <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" style="margin-left: 2rem; color: var(--text-color); font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 0.5rem;">
-                    <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: var(--secondary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border: 2px solid white;">
-                        {% if user.profile_image %}
-                            <img src="{{ user.profile_image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
-                        {% else %}
-                            {{ user.username|make_list|first|upper }}
-                        {% endif %}
-                    </div>
-                    <span style="display: none; @media(min-width: 768px){display:inline;}">
-                        {{ user.username }}
-                    </span>
-                </a>
-                <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" style="background: none; border: none; font-family: inherit; margin-left: 1rem; cursor: pointer; color: var(--text-muted); font-weight: 500; font-size: 0.95rem;">Logout</button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}">Login</a>
-                <a href="{% url 'register' %}" class="btn btn-primary" style="margin-left: 1rem; color: white; padding: 0.5rem 1rem;">Join Now</a>
             {% endif %}
-            <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        </div>
+
+        <!-- 3. User Actions (Right) -->
+        <div class="navbar-right">
+            {% if user.is_authenticated %}
+                {% if user.role == 'moderator' or user.is_superuser %}
+                    <a href="{% url 'dashboard' %}" class="nav-link" style="color: #EF4444; font-weight: 600;">Admin</a>
+                {% endif %}
+
+                <a href="{% url 'notification_list' %}" class="icon-btn" title="Notifications">
+                    🔔
+                    <span id="notification-badge" class="badge-dot"></span>
+                </a>
+
+                <div class="user-menu">
+                    <a href="{% url 'profile' %}" class="profile-link">
+                        <div class="avatar-small">
+                            {% if user.profile_image %}
+                                <img src="{{ user.profile_image.url }}" alt="Profile">
+                            {% else %}
+                                <span>{{ user.username|make_list|first|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <span class="username">{{ user.username }}</span>
+                    </a>
+                    <form action="{% url 'logout' %}" method="post" style="display: flex;">
+                        {% csrf_token %}
+                        <button type="submit" class="icon-btn logout-btn" title="Logout">↩️</button>
+                    </form>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}" class="nav-link">Login</a>
+                <a href="{% url 'register' %}" class="btn btn-primary btn-sm">Join Now</a>
+            {% endif %}
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
         </div>
     </div>
 </nav>
@@ -72,7 +83,6 @@
 <footer style="background: var(--bg-card); border-top: 1px solid var(--border-color); padding: 4rem 1rem 2rem 1rem; margin-top: auto;">
     <div style="max-width: 1200px; margin: 0 auto;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; margin-bottom: 3rem;">
-            
             <!-- Brand Column -->
             <div>
                 <h3 style="color: var(--primary-color); margin-bottom: 1rem; font-size: 1.5rem;">Circlo</h3>
@@ -149,9 +159,9 @@
         .catch(error => console.log('Notification poll error', error));
     }
 
-    // Poll every 15 seconds if user is logged in (badge exists)
+    // Poll every 15 seconds if user is logged in
     if (document.getElementById('notification-badge')) {
-        updateNotifications(); // Initial check
+        updateNotifications(); 
         setInterval(updateNotifications, 15000);
     }
 </script>
