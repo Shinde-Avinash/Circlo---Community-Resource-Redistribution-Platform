@@ -3,7 +3,7 @@
 Circlo is a hyperlocal web application designed to facilitate the redistribution of surplus resources (food, clothing, furniture, etc.) within a community. It connects donors with individuals in need, promoting sustainability and community support.
 
 ## 🚀 Features
-<img width="1352" height="592" alt="image" src="https://github.com/user-attachments/assets/65462d1f-5ae1-4003-b99a-06fb3547ebe4" />
+<img width="1365" height="766" alt="image" src="https://github.com/user-attachments/assets/af8b82ac-f376-45c5-adc3-ed8e6b6106ff" />
 
 *   **User Roles**: Distinct roles for Donors, Recipients, Organizations, and Moderators.
 *   **Hyperlocal Feed**:  Resources are sorted by proximity (using Haversine formula) and urgency.
