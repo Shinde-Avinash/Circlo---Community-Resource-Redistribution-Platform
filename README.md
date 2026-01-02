@@ -1,32 +1,59 @@
-### Circlo - Community Resource Redistribution Platform
+# 🌍 Circlo  
+## ♻️ Community Resource Redistribution Platform
 
-Circlo is a hyperlocal web application designed to facilitate the redistribution of surplus resources (food, clothing, furniture, etc.) within a community. It connects donors with individuals in need, promoting sustainability and community support.
+**Circlo** is a hyperlocal web application designed to redistribute surplus resources such as **food, clothing, furniture, and essentials** within local communities.  
+It connects **donors with people in need**, reducing waste while strengthening community support ❤️
 
-## 🚀 Features
-<img width="1365" height="766" alt="image" src="https://github.com/user-attachments/assets/af8b82ac-f376-45c5-adc3-ed8e6b6106ff" />
+---
 
-*   **User Roles**: Distinct roles for Donors, Recipients, Organizations, and Moderators.
-*   **Hyperlocal Feed**:  Resources are sorted by proximity (using Haversine formula) and urgency.
-*   **Resource Management**: Users can post items with images, categorization, and urgency levels.
-*   **Claim System**:  Automated "Claim" and "Unclaim" workflows with real-time inventory updates.
-*   **In-App Messaging**: Private chat system for donors and claimants to coordinate pickup.
-*   **Admin Dashboard**: comprehensive dashboard for moderators to manage users and content.
-*   **Responsive UI**:  Modern, "Cognizant-themed" interface with Dark/Light mode support.
+## ✨ Features
+<img width="1365" height="766" alt="Circlo Preview" src="https://github.com/user-attachments/assets/af8b82ac-f376-45c5-adc3-ed8e6b6106ff" />
 
-## 🛠️ Tech Stack
+🔐 **User Roles**  
+- Donors, Recipients, Organizations, and Moderators  
+- Role-based access and permissions  
 
-*   **Backend**: Django (Python 3.10+)
-*   **Frontend**: HTML5, CSS3 (Custom Variables), HTMX (for dynamic interactions)
-*   **Database**: SQLite (Development)
-*   **Geolocation**:  HTML5 Geolocation API + Server-side distance calculation.
+📍 **Hyperlocal Feed**  
+- Resources sorted by **distance and urgency**  
+- Powered by the **Haversine formula**
 
-## 📦 Installation & Setup
+📦 **Resource Management**  
+- Post items with images, categories, and urgency levels  
 
-1.  **Clone the Repository**
-    ```bash
-    git clone https://github.com/yourusername/circlo.git
-    cd circlo
-    ```
+🔄 **Claim System**  
+- Automated **Claim / Unclaim** workflow  
+- Real-time availability updates  
+
+💬 **In-App Messaging**  
+- Private chat between donors and recipients  
+- Easy coordination for pickups  
+
+🛡️ **Admin Dashboard**  
+- Manage users, resources, and platform activity  
+
+🎨 **Responsive UI**  
+- Modern **Cognizant-themed** design  
+- 🌙 Dark Mode & ☀️ Light Mode support  
+- Fully mobile-responsive  
+
+---
+
+## 🧰 Tech Stack
+
+- **Backend** 🧠: Django (Python 3.10+)  
+- **Frontend** 🎨: HTML5, CSS3 (Custom Variables), HTMX  
+- **Database** 🗄️: SQLite (Development)  
+- **Geolocation** 🧭: HTML5 Geolocation API + Server-side distance calculation  
+
+---
+
+## ⚙️ Installation & Setup
+
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/yourusername/circlo.git
+cd circlo
+```
 
 2.  **Create Virtual Environment**
     ```bash
