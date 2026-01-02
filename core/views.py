@@ -228,3 +228,9 @@ def leaderboard(request):
         })
         
     return render(request, 'leaderboard.html', {'ranked_donors': ranked_donors})
+
+from django.views.decorators.cache import cache_control
+
+@cache_control(max_age=0, no_cache=True, no_store=True, must_revalidate=True)
+def service_worker(request):
+    return render(request, 'sw.js', content_type='application/javascript')

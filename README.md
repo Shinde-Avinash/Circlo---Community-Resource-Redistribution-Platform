@@ -1,13 +1,18 @@
 # 🌍 Circlo  
 ## ♻️ Community Resource Redistribution Platform
 
-**Circlo** is a hyperlocal web application designed to redistribute surplus resources such as **food, clothing, furniture, and essentials** within local communities.  
+**Circlo** is a hyperlocal PWA-enabled web application designed to redistribute surplus resources such as **food, clothing, furniture, and essentials** within local communities.  
 It connects **donors with people in need**, reducing waste while strengthening community support ❤️
 
 ---
 
 ## ✨ Features
 <img width="1365" height="766" alt="Circlo Preview" src="https://github.com/user-attachments/assets/af8b82ac-f376-45c5-adc3-ed8e6b6106ff" />
+
+📱 **Installable App (PWA)**
+-   **Add to Home Screen**: Install like a native app on iOS and Android.
+-   **Offline Support**: Works even with spotty internet connections.
+-   **App-like UI**: Standalone experience without browser bars.
 
 🔐 **User Roles**  
 - Donors, Recipients, Organizations, and Moderators  
@@ -44,6 +49,7 @@ It connects **donors with people in need**, reducing waste while strengthening c
 - **Frontend** 🎨: HTML5, CSS3 (Custom Variables), HTMX  
 - **Database** 🗄️: SQLite (Development)  
 - **Geolocation** 🧭: HTML5 Geolocation API + Server-side distance calculation  
+- **PWA** 🚀: Service Workers, Web App Manifest, Cache API
 
 ---
 
@@ -55,49 +61,53 @@ git clone https://github.com/yourusername/circlo.git
 cd circlo
 ```
 
-2.  **Create Virtual Environment**
-    ```bash
-    python -m venv venv
-    # Windows
-    venv\Scripts\activate
-    # Mac/Linux
-    source venv/bin/activate
-    ```
+### 2️⃣ Create Virtual Environment
+```bash
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# Mac/Linux
+source venv/bin/activate
+```
 
-3.  **Install Dependencies**
-    ```bash
-    pip install django pillow
-    ```
+### 3️⃣ Install Dependencies
+```bash
+pip install django pillow
+```
 
-4.  **Apply Migrations**
-    ```bash
-    python manage.py makemigrations
-    python manage.py migrate
-    ```
+### 4️⃣ Apply Migrations
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
 
-5.  **Create Superuser (Admin)**
-    ```bash
-    python manage.py createsuperuser
-    ```
+### 5️⃣ Create Superuser (Admin)
+```bash
+python manage.py createsuperuser
+```
 
-6.  **Run Development Server**
-    ```bash
-    python manage.py runserver
-    ```
+### 6️⃣ Run Development Server
+```bash
+python manage.py runserver
+```
 
-    Visit `http://127.0.0.1:8000/` in your browser.
+Visit `http://127.0.0.1:8000/` in your browser.
+
+---
 
 ## 📂 Project Structure
 
-*   `core/`: Main app handling the Home feed, Templates, and static assets.
+*   `core/`: Main app handling the Home feed, Templates, PWA assets (sw.js, manifest), and static files.
 *   `users/`: User authentication, profiles, and role management.
 *   `resources/`: Resource CRUD operations, logic for posting and claiming items.
 *   `messaging/`: Real-time internal messaging system.
 *   `crrp/`: Project configuration settings.
+
+---
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please fork the repository and submit a pull request.
 
 ---
-*Built for the Future of Community Sharing.*
+*Built with ❤️ for the Future of Community Sharing.*
