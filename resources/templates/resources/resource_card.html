@@ -43,9 +43,11 @@
                     {% if res.donor == user %}
                         <span class="badge badge-yellow" style="font-size: 0.7rem;">Mine</span>
                     {% else %}
-                        <form action="{% url 'claim_resource' res.id %}" method="post" onsubmit="return openClaimModal(event, this, {{ res.available_quantity }});" onclick="event.stopPropagation()">
+                        <form action="{% url 'claim_resource' res.id %}" method="post" onsubmit="return openClaimModal(event, this, {{ res.available_quantity }}, '{{ res.resource_type }}');" onclick="event.stopPropagation()">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-primary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Claim</button>
+                            <button type="submit" class="btn btn-primary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">
+                                {% if res.resource_type == 'request' %}Fulfill{% else %}Claim{% endif %}
+                            </button>
                         </form>
                     {% endif %}
                 {% else %}

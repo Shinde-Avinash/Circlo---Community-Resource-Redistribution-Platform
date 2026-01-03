@@ -165,7 +165,7 @@
     let currentForm = null;
     let maxAvailable = 1;
 
-    function openClaimModal(event, form, availableQty) {
+    function openClaimModal(event, form, availableQty, resourceType) {
         event.preventDefault();
         event.stopPropagation();
         currentForm = form;
@@ -176,6 +176,21 @@
         input.value = 1;
         input.max = maxAvailable;
         document.querySelector('#availQtyText span').textContent = maxAvailable;
+        
+        // Update Modal Text based on Type
+        const modalTitle = document.querySelector('#claimModal h3');
+        const modalBody = document.querySelector('#claimModal p');
+        const confirmBtn = document.getElementById('confirmClaimBtn');
+        
+        if (resourceType === 'request') {
+            modalTitle.textContent = 'Fulfill Request';
+            modalBody.textContent = 'How many units would you like to fulfill?';
+            confirmBtn.textContent = 'Yes, Fulfill it!';
+        } else {
+            modalTitle.textContent = 'Claim Resource';
+            modalBody.textContent = 'How many units would you like to claim?';
+            confirmBtn.textContent = 'Yes, Claim it!';
+        }
         
         document.getElementById('claimModal').style.display = 'flex';
         return false;
